@@ -1,0 +1,106 @@
+{
+  "incident_id": "INC-2042",
+  "title": "OrderFlow checkout 14.4x error-budget burn",
+  "started_at": "2026-11-20T02:00:00Z",
+  "window_minutes": 15,
+  "ics_roles": {
+    "IC": "maya-ic",
+    "Ops": "alice-ops",
+    "Comms": "devon-comms",
+    "AI_Scribe": "orderflow-ics-scribe"
+  },
+  "active_locks": [
+    {
+      "workload": "deployment/order-service",
+      "namespace": "orderflow",
+      "owner": "alice-ops",
+      "role": "Ops",
+      "acquired_at": "2026-11-20T02:08:30Z",
+      "reason": "Manual db-pool hotfix patch"
+    }
+  ],
+  "events": [
+    {
+      "ts": "2026-11-20T02:00:05Z",
+      "type": "alert_fired",
+      "actor": "alertmanager",
+      "role": "Telemetry",
+      "error_budget_remaining_pct": 54.0,
+      "burn_rate": 14.4,
+      "summary": "OrderFlowCheckoutFastBurn 14.4x on order-service"
+    },
+    {
+      "ts": "2026-11-20T02:01:10Z",
+      "type": "ics_assigned",
+      "actor": "maya-ic",
+      "role": "IC",
+      "summary": "Opened #inc-2042; assigned Ops and Comms"
+    },
+    {
+      "ts": "2026-11-20T02:02:00Z",
+      "type": "telemetry_snapshot",
+      "actor": "prometheus-mcp",
+      "role": "Telemetry",
+      "burn_rate": 14.4,
+      "error_budget_remaining_pct": 53.2,
+      "summary": "Checkout 5xx 4.8%; checkout-db pool at 99%"
+    },
+    {
+      "ts": "2026-11-20T02:04:15Z",
+      "type": "hypothesis_ruled_out",
+      "actor": "orderflow-kagent-coordinator",
+      "role": "AI_Scribe",
+      "hypothesis": "payment-worker OOMKilled root cause",
+      "summary": "Ruled out payment-worker OOM via pod metrics"
+    },
+    {
+      "ts": "2026-11-20T02:05:30Z",
+      "type": "comms_update",
+      "actor": "devon-comms",
+      "role": "Comms",
+      "summary": "Updated status page on checkout latency"
+    },
+    {
+      "ts": "2026-11-20T02:06:45Z",
+      "type": "hypothesis_ruled_out",
+      "actor": "alice-ops",
+      "role": "Ops",
+      "hypothesis": "CoreDNS resolution latency spike",
+      "summary": "Ruled out DNS spike; p99 lookup steady 1.8ms"
+    },
+    {
+      "ts": "2026-11-20T02:08:30Z",
+      "type": "human_lock_acquired",
+      "actor": "alice-ops",
+      "role": "Ops",
+      "workload": "deployment/order-service",
+      "summary": "Ops locked deployment/order-service for hotfix"
+    },
+    {
+      "ts": "2026-11-20T02:10:00Z",
+      "type": "mitigation_active",
+      "actor": "alice-ops",
+      "role": "Ops",
+      "workload": "deployment/order-service",
+      "summary": "Applying db-pool cap patch on order-service"
+    },
+    {
+      "ts": "2026-11-20T02:12:30Z",
+      "type": "telemetry_snapshot",
+      "actor": "prometheus-mcp",
+      "role": "Telemetry",
+      "burn_rate": 6.1,
+      "error_budget_remaining_pct": 51.8,
+      "summary": "Checkout 5xx down 4.8% -> 1.9%; burn 6.1x"
+    },
+    {
+      "ts": "2026-11-20T02:14:00Z",
+      "type": "agent_action_proposed",
+      "actor": "orderflow-rollback-agent",
+      "role": "Agent",
+      "workload": "deployment/order-service",
+      "action": "argo_rollouts_abort",
+      "summary": "Agent requested abort on order-service"
+    }
+  ]
+}

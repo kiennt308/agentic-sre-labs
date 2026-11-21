@@ -1,0 +1,16 @@
+apiVersion: orderflow.dev/v1
+kind: SreAutonomyPolicy
+metadata:
+  name: rogue-day1-unbounded-sre
+spec:
+  service: orderflow-checkout
+  agent_runtime: kagent
+  autonomy_level: 3
+  progressive_trust_days: 0
+  guaranteed_rollback_path: false
+  error_budget_remaining_pct: 64
+  cooldown_active: false
+  actions_this_incident: 0
+  trigger_type: static_cpu_threshold
+  proposed_actions:
+    - delete_pvc

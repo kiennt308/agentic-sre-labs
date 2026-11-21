@@ -1,0 +1,14 @@
+# 02-kagent-legacy-0x-negative.yaml
+# NEGATIVE FIXTURE: legacy kagent.dev/v1alpha1 ToolServer & unsigned A2A.
+# Expected to FAIL Conftest policies/sre_autonomy_gates.rego checks.
+apiVersion: kagent.dev/v1alpha1
+kind: ToolServer
+metadata:
+  name: orderflow-legacy-toolserver
+  namespace: orderflow-sre
+spec:
+  protocol: "A2A"
+  jws_signed: false
+  expose_internal_memory: true
+  transport: "sse"
+  url: "http://127.0.0.1:18091/sse"

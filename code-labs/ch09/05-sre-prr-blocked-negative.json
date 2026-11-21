@@ -1,0 +1,28 @@
+{
+  "artifact_type": "sre_prr",
+  "agent_id": "orderflow-kagent-experimental",
+  "environment": "production",
+  "autonomy_level": 3,
+  "progressive_trust_days": 30,
+  "guaranteed_rollback_path": true,
+  "error_budget_remaining_pct": 64.0,
+  "cooldown_active": false,
+  "cooldown_seconds": 300,
+  "actions_this_incident": 0,
+  "max_autonomous_actions_per_incident": 2,
+  "proposed_actions": [
+    "argo_rollouts_abort"
+  ],
+  "ics_human_lock_active": false,
+  "autonomous_mutation_requested": false,
+  "top1_rca_precision": 0.62,
+  "false_positive_rate": 0.18,
+  "citation_integrity": 0.75,
+  "chaos_scenarios_failed": [
+    "S1_DB_POOL_TOXIPROXY",
+    "S4_POISONED_LOG_BUDGET_LOW"
+  ],
+  "prr_checklist_score": "14/20",
+  "approved_by": null,
+  "prr_status": "BLOCKED"
+}

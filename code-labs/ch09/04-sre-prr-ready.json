@@ -1,0 +1,31 @@
+{
+  "artifact_type": "sre_prr",
+  "agent_id": "orderflow-kagent-coordinator",
+  "environment": "production",
+  "autonomy_level": 3,
+  "progressive_trust_days": 30,
+  "guaranteed_rollback_path": true,
+  "error_budget_remaining_pct": 64.0,
+  "cooldown_active": false,
+  "cooldown_seconds": 300,
+  "actions_this_incident": 0,
+  "max_autonomous_actions_per_incident": 2,
+  "proposed_actions": [
+    "argo_rollouts_abort",
+    "priority_load_shedding"
+  ],
+  "ics_human_lock_active": false,
+  "autonomous_mutation_requested": false,
+  "top1_rca_precision": 0.92,
+  "false_positive_rate": 0.03,
+  "citation_integrity": 1.0,
+  "chaos_scenarios_passed": [
+    "S1_DB_POOL_TOXIPROXY",
+    "S2_CANARY_REGRESSION",
+    "S3_POD_CRASH_CASCADE",
+    "S4_POISONED_LOG_BUDGET_LOW"
+  ],
+  "prr_checklist_score": "20/20",
+  "approved_by": "sre-platform-lead",
+  "prr_status": "READY"
+}

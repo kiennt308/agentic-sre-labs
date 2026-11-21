@@ -1,0 +1,87 @@
+{
+  "protocol": "A2A",
+  "protocol_version": "1.0.0",
+  "jws_signed": true,
+  "expose_internal_memory": false,
+  "well_known_path": "/.well-known/agent-card.json",
+  "cards": {
+    "orderflow-kagent-coordinator": {
+      "agent_id": "orderflow-kagent-coordinator",
+      "name": "OrderFlow SRE Coordinator",
+      "description": "Coordinates multi-signal RCA via A2A Tasks",
+      "url": "http://127.0.0.1:18100",
+      "well_known_path": "/.well-known/agent-card.json",
+      "version": "1.0.1",
+      "protocol": "A2A",
+      "protocol_version": "1.0.0",
+      "jws_signed": true,
+      "expose_internal_memory": false,
+      "capabilities": {
+        "streaming": true,
+        "pushNotifications": false,
+        "stateTransitionHistory": true
+      },
+      "defaultInputModes": ["application/json"],
+      "defaultOutputModes": ["application/json"],
+      "skills": [
+        {
+          "id": "coordinate-rca",
+          "name": "Coordinate Multi-Signal RCA",
+          "tags": ["sre", "rca", "a2a"]
+        }
+      ]
+    },
+    "orderflow-metrics-agent": {
+      "agent_id": "orderflow-metrics-agent",
+      "name": "OrderFlow Metrics Specialist",
+      "description": "Queries SLO burn rates and Prometheus MCP",
+      "url": "http://127.0.0.1:18101",
+      "well_known_path": "/.well-known/agent-card.json",
+      "version": "1.0.1",
+      "protocol": "A2A",
+      "protocol_version": "1.0.0",
+      "jws_signed": true,
+      "expose_internal_memory": false,
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false,
+        "stateTransitionHistory": true
+      },
+      "defaultInputModes": ["application/json"],
+      "defaultOutputModes": ["application/json"],
+      "skills": [
+        {
+          "id": "slo-burn-analysis",
+          "name": "SLO Burn Rate Analysis",
+          "tags": ["prometheus", "slo", "burn-rate"]
+        }
+      ]
+    },
+    "orderflow-trace-agent": {
+      "agent_id": "orderflow-trace-agent",
+      "name": "OrderFlow Trace Specialist",
+      "description": "Analyzes OTel exemplars and rollout diffs",
+      "url": "http://127.0.0.1:18102",
+      "well_known_path": "/.well-known/agent-card.json",
+      "version": "1.0.1",
+      "protocol": "A2A",
+      "protocol_version": "1.0.0",
+      "jws_signed": true,
+      "expose_internal_memory": false,
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false,
+        "stateTransitionHistory": true
+      },
+      "defaultInputModes": ["application/json"],
+      "defaultOutputModes": ["application/json"],
+      "skills": [
+        {
+          "id": "trace-exemplar-rca",
+          "name": "OTel Exemplar & Rollout Correlation",
+          "tags": ["otel", "traces", "rollouts"]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+apiVersion: orderflow.dev/v1
+kind: SreAutonomyPolicy
+metadata:
+  name: orderflow-checkout-autonomy
+spec:
+  service: orderflow-checkout
+  agent_runtime: kagent
+  autonomy_level: 3
+  progressive_trust_days: 30
+  guaranteed_rollback_path: true
+  error_budget_remaining_pct: 64
+  cooldown_active: false
+  cooldown_seconds: 900
+  actions_this_incident: 0
+  trigger_type: mwmbr_burn_rate
+  ics_human_lock_active: false
+  proposed_actions:
+    - argo_rollouts_abort
+  mcpServers:
+    kubernetes:
+      transport: streamable-http
+      protocol_version: "2026-07-28"
+      url: "http://127.0.0.1:18090/mcp"
+      read_only: true
+      allowed_tools:
+        - pods_get
+        - pods_log
+        - events_list
+    prometheus:
+      transport: streamable-http
+      protocol_version: "2026-07-28"
+      url: "http://127.0.0.1:18091/mcp"
+      read_only: true
+      allowed_tools:
+        - instant_query
+        - query_range

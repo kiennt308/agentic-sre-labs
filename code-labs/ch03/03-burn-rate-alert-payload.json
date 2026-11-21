@@ -1,0 +1,59 @@
+{
+  "version": "4",
+  "groupKey": "{}:{alertname=\"OrderFlowCheckoutFastBurn\"}",
+  "truncatedAlerts": 0,
+  "status": "firing",
+  "receiver": "holmesgpt-investigator",
+  "groupLabels": {
+    "alertname": "OrderFlowCheckoutFastBurn",
+    "namespace": "orderflow-prod",
+    "service": "order-service",
+    "slo": "99.95%"
+  },
+  "commonLabels": {
+    "alertname": "OrderFlowCheckoutFastBurn",
+    "severity": "page",
+    "namespace": "orderflow-prod",
+    "service": "order-service",
+    "slo": "99.95%",
+    "trigger_type": "mwmbr_burn_rate",
+    "region": "us-east-1"
+  },
+  "commonAnnotations": {
+    "summary": "Checkout error budget burning at 14.8x SLO target",
+    "burn_rate": "14.8",
+    "error_budget_remaining_pct": "64.2",
+    "runbook": "https://runbooks.orderflow.internal/checkout-burn"
+  },
+  "externalURL": "http://alertmanager.monitoring.svc:9093",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "OrderFlowCheckoutFastBurn",
+        "severity": "page",
+        "namespace": "orderflow-prod",
+        "service": "order-service",
+        "slo": "99.95%",
+        "window_long": "1h",
+        "window_short": "5m"
+      },
+      "annotations": {
+        "summary": "Fast burn 14.8x on 1h and 5m checkout windows",
+        "promql": "orderflow:http_errors:ratio_rate1h > 0.0072",
+        "burn_rate": "14.8"
+      },
+      "startsAt": "2026-11-20T02:01:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus.monitoring.svc:9090/graph",
+      "fingerprint": "a94f3c8e21b07d12"
+    }
+  ],
+  "slo_snapshot": {
+    "burn_rate": 14.8,
+    "slo": "99.95%",
+    "namespace": "orderflow-prod",
+    "service": "order-service",
+    "error_budget_remaining_pct": 64.2
+  }
+}

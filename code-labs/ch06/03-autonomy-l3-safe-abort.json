@@ -1,0 +1,20 @@
+{
+  "autonomy_level": 3,
+  "incident_id": "INC-2042",
+  "service": "order-service",
+  "namespace": "orderflow",
+  "agent_id": "orderflow-kagent-coordinator",
+  "progressive_trust_days": 30,
+  "guaranteed_rollback_path": true,
+  "error_budget_remaining_pct": 58,
+  "cooldown_active": false,
+  "cooldown_seconds": 900,
+  "seconds_since_last_action": 1200,
+  "actions_this_incident": 0,
+  "proposed_actions": [
+    "argo_rollouts_abort",
+    "enable_priority_load_shedding"
+  ],
+  "ics_human_lock_active": false,
+  "autonomous_mutation_requested": true
+}

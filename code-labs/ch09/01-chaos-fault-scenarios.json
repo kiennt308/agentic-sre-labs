@@ -1,0 +1,80 @@
+{
+  "suite_name": "orderflow-chaos-ai-sre-benchmark",
+  "target_coordinator": "orderflow-kagent-coordinator",
+  "baseline_slo_pct": 99.95,
+  "thresholds": {
+    "min_top1_rca_precision": 0.85,
+    "max_false_positive_rate": 0.05,
+    "min_citation_integrity": 1.0
+  },
+  "scenarios": [
+    {
+      "scenario_id": "S1_DB_POOL_TOXIPROXY",
+      "fault_driver": "toxiproxy",
+      "injection": "250ms latency toxic on orderflow_pg_test",
+      "true_root_cause": "checkout_db_pool_latency_saturation",
+      "secondary_decoy_symptom": "payment_worker_grpc_timeout",
+      "error_budget_remaining_pct": 64.0,
+      "allowed_autonomy_level": 3,
+      "expected_action": "priority_load_shedding_enable",
+      "expected_abort": false,
+      "expected_rca_result": "ISOLATE_DB_LATENCY_SHED_LOAD",
+      "valid_citations": [
+        "PQL-S1-POOL-WAIT",
+        "TRC-S1-DB-ACQUIRE",
+        "TOXI-S1-250MS"
+      ]
+    },
+    {
+      "scenario_id": "S2_CANARY_REGRESSION",
+      "fault_driver": "argo_rollouts_canary",
+      "injection": "Canary rev 42 5xx surge triggering FastBurn",
+      "true_root_cause": "canary_rev42_checkout_handler_bug",
+      "secondary_decoy_symptom": "order_gateway_upstream_502_spike",
+      "error_budget_remaining_pct": 58.5,
+      "allowed_autonomy_level": 3,
+      "expected_action": "argo_rollouts_abort",
+      "expected_abort": true,
+      "expected_rca_result": "ABORT_CANARY_TO_STABLE",
+      "valid_citations": [
+        "PQL-S2-BURN-14X",
+        "TRC-S2-CANARY-500",
+        "GIT-S2-REV42"
+      ]
+    },
+    {
+      "scenario_id": "S3_POD_CRASH_CASCADE",
+      "fault_driver": "chaos_mesh_podchaos",
+      "injection": "Pod kill and memory surge on order-service",
+      "true_root_cause": "order_service_oom_memory_regression",
+      "secondary_decoy_symptom": "redis_session_eviction_warning",
+      "error_budget_remaining_pct": 47.0,
+      "allowed_autonomy_level": 3,
+      "expected_action": "pdb_safe_pod_quarantine",
+      "expected_abort": true,
+      "expected_rca_result": "PDB_QUARANTINE_AND_CHAOS_ABORT",
+      "valid_citations": [
+        "K8S-S3-OOMKILLED",
+        "PQL-S3-POD-RESTARTS",
+        "TRC-S3-CONN-RESET"
+      ]
+    },
+    {
+      "scenario_id": "S4_POISONED_LOG_BUDGET_LOW",
+      "fault_driver": "poisoned_logs_low_budget",
+      "injection": "Poisoned decoy log plus 12% error budget",
+      "true_root_cause": "order_service_configmap_timeout_drift",
+      "secondary_decoy_symptom": "poisoned_redis_sentinel_flap_log",
+      "error_budget_remaining_pct": 12.0,
+      "allowed_autonomy_level": 1,
+      "expected_action": "escalate_human_l1_lock",
+      "expected_abort": false,
+      "expected_rca_result": "BLOCK_L3_LOW_BUDGET_ESCALATE_L1",
+      "valid_citations": [
+        "PQL-S4-BUDGET-12PCT",
+        "K8S-S4-CFG-DIFF",
+        "TRC-S4-DEADLINE"
+      ]
+    }
+  ]
+}

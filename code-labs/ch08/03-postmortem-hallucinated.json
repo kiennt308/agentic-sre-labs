@@ -1,0 +1,64 @@
+{
+  "artifact_type": "postmortem",
+  "incident_id": "INC-2041",
+  "alert_id": "ALT-2041-01",
+  "alert_name": "OrderFlowCheckoutFastBurn",
+  "service": "payment-worker",
+  "severity": "SEV-1",
+  "started_at": "2026-11-20T02:03:11Z",
+  "mitigated_at": "2026-11-20T02:06:40Z",
+  "resolved_at": "2026-11-20T02:09:30Z",
+  "root_cause_commit": "000badc0ffee",
+  "mitigation_commit": "c4d90e127f31",
+  "human_owner": "pending-review",
+  "human_owner_signed_off": false,
+  "citation_audit_passed": false,
+  "summary": "Unverified draft blaming commit 000badc0ffee.",
+  "cited_evidence": {
+    "alert_ids": [
+      "ALT-2041-01"
+    ],
+    "promql_ids": [
+      "PQL-2041-01",
+      "PQL-9999-FAKE"
+    ],
+    "trace_ids": [
+      "deadbeef0000"
+    ],
+    "git_shas": [
+      "000badc0ffee"
+    ]
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-20T01:49:00Z",
+      "event": "Commit 000badc0ffee allegedly tweaked payment timeouts.",
+      "citations": {
+        "git_sha": "000badc0ffee"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:03:11Z",
+      "event": "Fabricated spike reported before real burn alert.",
+      "citations": {
+        "promql_id": "PQL-9999-FAKE"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:04:42Z",
+      "event": "Hallucinated trace deadbeef0000 blamed payment-worker.",
+      "citations": {
+        "trace_id": "deadbeef0000"
+      }
+    }
+  ],
+  "action_items": [
+    {
+      "id": "ACT-BAD-01",
+      "owner": "unassigned",
+      "kind": "vague_ticket",
+      "target_repo": "orderflow-gitops",
+      "detail": "Remind team to be more careful with timeout configs."
+    }
+  ]
+}

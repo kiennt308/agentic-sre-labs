@@ -1,0 +1,93 @@
+# OrderFlow order-service Argo Rollout with canary SLO abort gates.
+# Auto-aborts canary on 5xx error-rate or rollout_duration_seconds.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: order-service
+  namespace: orderflow
+  labels:
+    app: order-service
+    part-of: orderflow
+spec:
+  replicas: 4
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: ghcr.io/kiennt308/order-service:v2.4.1
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  strategy:
+    canary:
+      canaryService: order-service-canary
+      stableService: order-service-stable
+      analysis:
+        templates:
+          - templateName: order-service-slo-gate
+        startingStep: 1
+        args:
+          - name: service-name
+            value: order-service
+      steps:
+        - setWeight: 10
+        - pause:
+            duration: 2m
+        - setWeight: 50
+        - pause:
+            duration: 5m
+        - setWeight: 100
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: order-service-slo-gate
+  namespace: orderflow
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: http-error-rate-abort
+      interval: 30s
+      failureLimit: 2
+      successCondition: result[0] <= 0.01
+      failureCondition: result[0] > 0.01
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: >-
+            sum(rate(http_requests_total{
+            service="{{args.service-name}}",code=~"5.."}[2m]))
+            / sum(rate(http_requests_total{
+            service="{{args.service-name}}"}[2m]))
+    - name: rollout-duration-budget
+      interval: 30s
+      failureLimit: 1
+      successCondition: result[0] <= 300
+      failureCondition: result[0] > 300
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: >-
+            max(rollout_duration_seconds{
+            service="{{args.service-name}}"})

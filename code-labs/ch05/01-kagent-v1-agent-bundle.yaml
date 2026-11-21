@@ -1,0 +1,75 @@
+# 01-kagent-v1-agent-bundle.yaml
+# Declarative kagent v1.0.1 Agent Substrate CRDs for OrderFlow SRE.
+# Copyright (c) 2026 Kien Nguyen. Licensed under Apache-2.0.
+apiVersion: kagent.dev/v1
+kind: ModelConfig
+metadata:
+  name: orderflow-ollama-model
+  namespace: orderflow-sre
+spec:
+  provider: Ollama
+  model: qwen2.5:14b-instruct
+  baseUrl: http://127.0.0.1:11434/v1
+  temperature: 0.1
+---
+apiVersion: kagent.dev/v1
+kind: RemoteMCPServer
+metadata:
+  name: orderflow-prometheus-mcp
+  namespace: orderflow-sre
+spec:
+  protocol: streamable-http
+  transport: streamable-http
+  url: http://127.0.0.1:18091/mcp
+  read_only: true
+  sessionIdentity: preserve
+  allowedTools:
+    - query_slo_burn
+    - fetch_otel_exemplar
+    - get_rollout_diff
+---
+apiVersion: kagent.dev/v1
+kind: Harness
+metadata:
+  name: orderflow-substrate-harness
+  namespace: orderflow-sre
+spec:
+  runtime: agent-substrate
+  sandbox: gvisor
+  autoSuspendSeconds: 60
+  resumeLatencyTargetMs: 150
+  image: ghcr.io/kagent-dev/kagent-runner:v1.0.1
+---
+apiVersion: kagent.dev/v1
+kind: AgentTemplate
+metadata:
+  name: orderflow-sre-coordinator-tpl
+  namespace: orderflow-sre
+spec:
+  modelConfigRef: orderflow-ollama-model
+  systemMessage: >-
+    Correlate OrderFlow SLO burn, OTel exemplars, and rollout diffs.
+    Delegate horizontally via signed A2A v1.0.0 Tasks only.
+  remoteMcpServers:
+    - name: orderflow-prometheus-mcp
+      allowedTools:
+        - query_slo_burn
+        - fetch_otel_exemplar
+        - get_rollout_diff
+  a2aPeers:
+    - orderflow-metrics-agent
+    - orderflow-trace-agent
+---
+apiVersion: kagent.dev/v1
+kind: Agent
+metadata:
+  name: orderflow-kagent-coordinator
+  namespace: orderflow-sre
+spec:
+  templateRef: orderflow-sre-coordinator-tpl
+  harnessRef: orderflow-substrate-harness
+  autonomyLevel: 1
+  protocol: A2A
+  jws_signed: true
+  expose_internal_memory: false
+  agentCardPath: /.well-known/agent-card.json

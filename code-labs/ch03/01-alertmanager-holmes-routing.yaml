@@ -1,0 +1,63 @@
+# 01-alertmanager-holmes-routing.yaml
+# Alertmanager v0.35.0 routing config for HolmesGPT v0.46.0 webhooks.
+# Copyright (c) 2026 Kien Nguyen. Licensed under Apache-2.0.
+global:
+  resolve_timeout: 5m
+
+time_intervals:
+  - name: off-hours-window
+    time_intervals:
+      - weekdays: ["saturday", "sunday"]
+      - weekdays: ["monday:friday"]
+        times:
+          - start_time: "00:00"
+            end_time: "08:00"
+          - start_time: "20:00"
+            end_time: "24:00"
+
+route:
+  receiver: sre-ticket-sink
+  group_by: [alertname, namespace, service, slo]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 2h
+  routes:
+    - matchers:
+        - alertname="OrderFlowCheckoutFastBurn"
+      receiver: holmesgpt-investigator
+      group_wait: 10s
+      repeat_interval: 30m
+      continue: true
+    - matchers:
+        - severity="page"
+      receiver: oncall-pager-sink
+      repeat_interval: 15m
+    - matchers:
+        - severity="ticket"
+      receiver: sre-ticket-sink
+      mute_time_intervals:
+        - off-hours-window
+
+inhibit_rules:
+  - source_matchers:
+      - severity="page"
+    target_matchers:
+      - severity="ticket"
+    equal: [namespace, service, slo]
+
+receivers:
+  - name: holmesgpt-investigator
+    webhook_configs:
+      - url: http://127.0.0.1:8080/api/v1/alertmanager
+        send_resolved: true
+        max_alerts: 10
+  - name: oncall-pager-sink
+    webhook_configs:
+      - url: http://127.0.0.1:8081/v1/page
+        send_resolved: true
+        max_alerts: 10
+  - name: sre-ticket-sink
+    webhook_configs:
+      - url: http://127.0.0.1:8081/v1/ticket
+        send_resolved: true
+        max_alerts: 25

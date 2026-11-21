@@ -1,0 +1,125 @@
+{
+  "artifact_type": "postmortem",
+  "incident_id": "INC-2041",
+  "alert_id": "ALT-2041-01",
+  "alert_name": "OrderFlowCheckoutFastBurn",
+  "service": "order-service",
+  "severity": "SEV-1",
+  "started_at": "2026-11-20T02:04:00Z",
+  "mitigated_at": "2026-11-20T02:06:40Z",
+  "resolved_at": "2026-11-20T02:09:30Z",
+  "root_cause_commit": "a8f31c9e4b20",
+  "mitigation_commit": "c4d90e127f31",
+  "human_owner": "oncall-lead-mchen",
+  "human_owner_signed_off": true,
+  "citation_audit_passed": true,
+  "summary": "Canary rev 42 set pool max=8, exhausting order-service DB.",
+  "cited_evidence": {
+    "alert_ids": [
+      "ALT-2041-01",
+      "ALT-2041-02"
+    ],
+    "promql_ids": [
+      "PQL-2041-01",
+      "PQL-2041-02",
+      "PQL-2041-03",
+      "PQL-2041-04"
+    ],
+    "trace_ids": [
+      "4f8a91c2e7b031d4",
+      "9c12d4a708fe22b1"
+    ],
+    "git_shas": [
+      "a8f31c9e4b20",
+      "c4d90e127f31"
+    ]
+  },
+  "timeline": [
+    {
+      "timestamp": "2026-11-20T01:58:12Z",
+      "event": "Commit a8f31c9e4b20 set db_pool_max_conns=8 in rev 42.",
+      "citations": {
+        "git_sha": "a8f31c9e4b20"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:04:00Z",
+      "event": "Alert ALT-2041-01 fired OrderFlowCheckoutFastBurn 14.4x.",
+      "citations": {
+        "alert_id": "ALT-2041-01"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:04:18Z",
+      "event": "PromQL PQL-2041-01 captured 5m burn rate at 14.82.",
+      "citations": {
+        "promql_id": "PQL-2041-01"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:04:35Z",
+      "event": "PromQL PQL-2041-02 read pool wait p99 at 2.45s.",
+      "citations": {
+        "promql_id": "PQL-2041-02"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:04:42Z",
+      "event": "Trace 4f8a91c2e7b031d4 failed db.acquire in 2450ms.",
+      "citations": {
+        "trace_id": "4f8a91c2e7b031d4"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:05:10Z",
+      "event": "Trace 9c12d4a708fe22b1 showed payment-worker timeout.",
+      "citations": {
+        "trace_id": "9c12d4a708fe22b1"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:06:05Z",
+      "event": "PromQL PQL-2041-03 read 64.2% remaining budget.",
+      "citations": {
+        "promql_id": "PQL-2041-03"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:06:40Z",
+      "event": "Level 3 Argo Rollouts abort restored stable baseline.",
+      "citations": {
+        "incident_id": "INC-2041"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:07:30Z",
+      "event": "Commit c4d90e127f31 opened agent/sre rollback PR.",
+      "citations": {
+        "git_sha": "c4d90e127f31"
+      }
+    },
+    {
+      "timestamp": "2026-11-20T02:09:15Z",
+      "event": "PromQL PQL-2041-04 confirmed 5m burn dropped to 0.42.",
+      "citations": {
+        "promql_id": "PQL-2041-04"
+      }
+    }
+  ],
+  "action_items": [
+    {
+      "id": "ACT-2041-01",
+      "owner": "platform-gitops",
+      "kind": "helm_schema_guard",
+      "target_repo": "orderflow-gitops",
+      "detail": "Require db_pool_max_conns >= 24 in production schema."
+    },
+    {
+      "id": "ACT-2041-02",
+      "owner": "sre-reliability",
+      "kind": "conftest_gate",
+      "target_repo": "orderflow-gitops",
+      "detail": "Block canary promotion when pool wait p99 exceeds 500ms."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "autonomy_level": 3,
+  "incident_id": "INC-2043",
+  "service": "order-service",
+  "namespace": "orderflow",
+  "agent_id": "orderflow-kagent-coordinator",
+  "progressive_trust_days": 30,
+  "guaranteed_rollback_path": true,
+  "error_budget_remaining_pct": 12,
+  "cooldown_active": true,
+  "cooldown_seconds": 900,
+  "seconds_since_last_action": 180,
+  "actions_this_incident": 2,
+  "proposed_actions": [
+    "delete_pvc"
+  ],
+  "ics_human_lock_active": false,
+  "autonomous_mutation_requested": true
+}

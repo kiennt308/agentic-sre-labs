@@ -1,0 +1,104 @@
+{
+  "incident_id": "INC-2026-1120-0200",
+  "namespace": "orderflow-prod",
+  "slo": "99.95%",
+  "anomaly_onset_utc": "2026-11-20T02:00:00Z",
+  "slo_burn": {
+    "service": "order-service",
+    "burn_rate_5m": 14.8,
+    "burn_rate_1h": 14.4,
+    "error_budget_remaining_pct": 64.2,
+    "window_minutes": [-15, 5]
+  },
+  "services": {
+    "order-service": {
+      "role": "upstream_checkout_api",
+      "error_rate_5xx": 0.082,
+      "p99_latency_ms": 4920,
+      "db_pool_used": 2,
+      "db_pool_max": 2,
+      "db_wait_ms": 4850,
+      "symptom_onset_utc": "2026-11-20T01:59:40Z",
+      "offset_seconds": -20,
+      "k8s_events": [
+        {
+          "reason": "RolloutCompleted",
+          "message": "order-service rev 8f2c19a scaled to 6 replicas",
+          "timestamp": "2026-11-20T01:54:12Z"
+        },
+        {
+          "reason": "Unhealthy",
+          "message": "Readiness probe slow: DB pool saturated (2/2)",
+          "timestamp": "2026-11-20T01:59:50Z"
+        }
+      ]
+    },
+    "order-gateway": {
+      "role": "edge_proxy",
+      "upstream": "order-service",
+      "http_502_rate": 0.079,
+      "symptom_onset_utc": "2026-11-20T02:00:15Z",
+      "offset_seconds": 15,
+      "k8s_events": [
+        {
+          "reason": "UpstreamTimeout",
+          "message": "order-service timed out after 4500ms",
+          "timestamp": "2026-11-20T02:00:20Z"
+        }
+      ]
+    },
+    "payment-worker": {
+      "role": "downstream_async_consumer",
+      "upstream": "order-service",
+      "pod_state": "OOMKilled",
+      "exit_code": 137,
+      "restarts": 4,
+      "retry_queue_depth": 1840,
+      "symptom_onset_utc": "2026-11-20T02:04:00Z",
+      "offset_seconds": 240,
+      "k8s_events": [
+        {
+          "reason": "OOMKilling",
+          "message": "Retry backlog heap exhausted at +4m",
+          "timestamp": "2026-11-20T02:04:00Z"
+        }
+      ]
+    }
+  },
+  "otel_exemplars": [
+    {
+      "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "span_id": "00f067aa0ba902b7",
+      "service": "order-service",
+      "operation": "checkout.db.acquire_conn",
+      "duration_ms": 4850,
+      "status": "ERROR",
+      "error": "DBPoolExhausted: active=2 max=2",
+      "timestamp": "2026-11-20T02:00:05Z"
+    },
+    {
+      "trace_id": "7c91e41099a24b1280de31ff6a0b9102",
+      "span_id": "11a84bc209fe7310",
+      "service": "payment-worker",
+      "operation": "payment.retry.consume",
+      "duration_ms": 3210,
+      "status": "ERROR",
+      "error": "Upstream order-service 504 backlog spike",
+      "timestamp": "2026-11-20T02:03:50Z"
+    }
+  ],
+  "rollout_diffs": [
+    {
+      "revision": "8f2c19a",
+      "namespace": "orderflow-prod",
+      "service": "order-service",
+      "deployed_at_utc": "2026-11-20T01:54:00Z",
+      "offset_seconds": -360,
+      "changed_key": "checkout_db_pool_max",
+      "old_value": 32,
+      "new_value": 2,
+      "pr_ref": "PR-412",
+      "git_trailer": "Agent-Id: ci-argocd-sync"
+    }
+  ]
+}

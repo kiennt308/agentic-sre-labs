@@ -1,0 +1,34 @@
+{
+  "incident_id": "INC-2026-1120-0215",
+  "namespace": "orderflow-prod",
+  "slo": "99.95%",
+  "anomaly_onset_utc": "2026-11-20T02:15:00Z",
+  "slo_burn": {
+    "service": "order-service",
+    "burn_rate_5m": 8.4,
+    "burn_rate_1h": 6.2,
+    "error_budget_remaining_pct": 59.0,
+    "window_minutes": [-15, 5]
+  },
+  "services": {
+    "order-service": {
+      "role": "upstream_checkout_api",
+      "error_rate_5xx": 0.021,
+      "p99_latency_ms": 980,
+      "symptom_onset_utc": "2026-11-20T02:15:00Z",
+      "offset_seconds": 0,
+      "k8s_events": []
+    },
+    "payment-worker": {
+      "role": "downstream_async_consumer",
+      "upstream": "order-service",
+      "pod_state": "Running",
+      "restarts": 0,
+      "symptom_onset_utc": "2026-11-20T02:15:30Z",
+      "offset_seconds": 30,
+      "k8s_events": []
+    }
+  },
+  "otel_exemplars": [],
+  "rollout_diffs": []
+}

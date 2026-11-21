@@ -1,0 +1,22 @@
+{
+  "autonomy_level": 2,
+  "incident_id": "INC-2041",
+  "service": "order-service",
+  "namespace": "orderflow",
+  "agent_id": "orderflow-rollback-agent",
+  "head_branch": "agent/sre-rollback-inc2041",
+  "base_branch": "main",
+  "target_sha": "8f2c19a",
+  "error_budget_remaining_pct": 46,
+  "cooldown_active": false,
+  "actions_this_incident": 0,
+  "proposed_actions": [
+    "open_gitops_rollback_pr"
+  ],
+  "requires_human_merge_approval": true,
+  "provenance_trailers": {
+    "Incident-Id": "INC-2041",
+    "Root-Cause-Commit": "8f2c19a",
+    "Evidence-Digest": "sha256:9c41b7e8d204"
+  }
+}

@@ -1,0 +1,155 @@
+# 04-prometheus-burn-rules.yaml
+# Prometheus v3.16.0 recording & MWMBR rules for OrderFlow 99.95% SLO.
+# Copyright (c) 2026 Kien Nguyen. Licensed under Apache-2.0.
+groups:
+  - name: orderflow_checkout_slo_recordings
+    interval: 1m
+    rules:
+      - record: orderflow:http_errors:ratio_rate5m
+        labels:
+          slo: "99.95%"
+          service: order-service
+        expr: >-
+          (
+            sum(rate(http_requests_total{
+            namespace="orderflow-prod",
+            service="order-service",
+            code=~"5.."
+            }[5m]))
+            or vector(0)
+          )
+          /
+          sum(rate(http_requests_total{
+          namespace="orderflow-prod",
+          service="order-service"
+          }[5m]))
+
+      - record: orderflow:http_errors:ratio_rate30m
+        labels:
+          slo: "99.95%"
+          service: order-service
+        expr: >-
+          (
+            sum(rate(http_requests_total{
+            namespace="orderflow-prod",
+            service="order-service",
+            code=~"5.."
+            }[30m]))
+            or vector(0)
+          )
+          /
+          sum(rate(http_requests_total{
+          namespace="orderflow-prod",
+          service="order-service"
+          }[30m]))
+
+      - record: orderflow:http_errors:ratio_rate1h
+        labels:
+          slo: "99.95%"
+          service: order-service
+        expr: >-
+          (
+            sum(rate(http_requests_total{
+            namespace="orderflow-prod",
+            service="order-service",
+            code=~"5.."
+            }[1h]))
+            or vector(0)
+          )
+          /
+          sum(rate(http_requests_total{
+          namespace="orderflow-prod",
+          service="order-service"
+          }[1h]))
+
+      - record: orderflow:http_errors:ratio_rate6h
+        labels:
+          slo: "99.95%"
+          service: order-service
+        expr: >-
+          (
+            sum(rate(http_requests_total{
+            namespace="orderflow-prod",
+            service="order-service",
+            code=~"5.."
+            }[6h]))
+            or vector(0)
+          )
+          /
+          sum(rate(http_requests_total{
+          namespace="orderflow-prod",
+          service="order-service"
+          }[6h]))
+
+      - record: orderflow:http_errors:ratio_rate3d
+        labels:
+          slo: "99.95%"
+          service: order-service
+        expr: >-
+          (
+            sum(rate(http_requests_total{
+            namespace="orderflow-prod",
+            service="order-service",
+            code=~"5.."
+            }[3d]))
+            or vector(0)
+          )
+          /
+          sum(rate(http_requests_total{
+          namespace="orderflow-prod",
+          service="order-service"
+          }[3d]))
+
+  - name: orderflow_checkout_mwmbr_alerts
+    interval: 1m
+    rules:
+      - alert: OrderFlowCheckoutFastBurn
+        expr: >-
+          orderflow:http_errors:ratio_rate1h{
+          service="order-service"} > (14.4 * 0.0005)
+          and
+          orderflow:http_errors:ratio_rate5m{
+          service="order-service"} > (14.4 * 0.0005)
+        for: 2m
+        labels:
+          severity: page
+          slo: "99.95%"
+          namespace: orderflow-prod
+          service: order-service
+        annotations:
+          summary: "OrderFlow fast burn 14.4x on 1h/5m windows"
+          runbook: "ch03/02-holmesgpt-mcp-toolsets.yaml"
+
+      - alert: OrderFlowCheckoutSlowFastBurn
+        expr: >-
+          orderflow:http_errors:ratio_rate6h{
+          service="order-service"} > (6.0 * 0.0005)
+          and
+          orderflow:http_errors:ratio_rate30m{
+          service="order-service"} > (6.0 * 0.0005)
+        for: 5m
+        labels:
+          severity: page
+          slo: "99.95%"
+          namespace: orderflow-prod
+          service: order-service
+        annotations:
+          summary: "OrderFlow medium burn 6.0x on 6h/30m windows"
+          runbook: "ch03/02-holmesgpt-mcp-toolsets.yaml"
+
+      - alert: OrderFlowCheckoutChronicBurn
+        expr: >-
+          orderflow:http_errors:ratio_rate3d{
+          service="order-service"} > (1.0 * 0.0005)
+          and
+          orderflow:http_errors:ratio_rate6h{
+          service="order-service"} > (1.0 * 0.0005)
+        for: 30m
+        labels:
+          severity: ticket
+          slo: "99.95%"
+          namespace: orderflow-prod
+          service: order-service
+        annotations:
+          summary: "OrderFlow chronic burn 1.0x on 3d/6h windows"
+          runbook: "ch03/02-holmesgpt-mcp-toolsets.yaml"

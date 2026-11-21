@@ -1,0 +1,60 @@
+# Chaos Mesh v2.8.8 Workflow testing orderflow-kagent-coordinator triage.
+# Author: Kien Nguyen | License: Apache-2.0
+# Repo: https://github.com/kiennt308/agentic-sre-labs
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: orderflow-kagent-chaos-eval
+  namespace: orderflow-staging
+  labels:
+    app.kubernetes.io/part-of: orderflow-agentic-sre
+    sre.orderflow.io/coordinator: orderflow-kagent-coordinator
+spec:
+  entry: chaos-eval-parallel-guard
+  templates:
+    - name: chaos-eval-parallel-guard
+      templateType: Parallel
+      deadline: "120s"
+      children:
+        - coordinator-status-guard
+        - bounded-triage-fault
+
+    - name: coordinator-status-guard
+      templateType: StatusCheck
+      deadline: "120s"
+      abortWithStatusCheck: true
+      statusCheck:
+        mode: Continuous
+        type: HTTP
+        intervalSeconds: 5
+        timeoutSeconds: 2
+        successThreshold: 1
+        failureThreshold: 2
+        http:
+          url: "http://orderflow-kagent-coordinator:8080/healthz"
+          method: GET
+          criteria:
+            statusCode: "200"
+
+    - name: bounded-triage-fault
+      templateType: Serial
+      deadline: "105s"
+      children:
+        - inject-db-latency-90s
+
+    - name: inject-db-latency-90s
+      templateType: NetworkChaos
+      deadline: "100s"
+      networkChaos:
+        action: delay
+        mode: one
+        selector:
+          namespaces:
+            - orderflow-staging
+          labelSelectors:
+            app.kubernetes.io/name: order-service
+        delay:
+          latency: "250ms"
+          jitter: "25ms"
+        direction: to
+        duration: "90s"

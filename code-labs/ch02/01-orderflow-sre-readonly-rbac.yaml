@@ -1,0 +1,33 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: orderflow-sre-readonly
+  namespace: orderflow-prod
+  labels:
+    app.kubernetes.io/part-of: orderflow-sre
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events", "services"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources: ["httproutes"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: orderflow-diag-cli-readonly
+  namespace: orderflow-prod
+  labels:
+    app.kubernetes.io/part-of: orderflow-sre
+subjects:
+  - kind: ServiceAccount
+    name: orderflow-diag-cli
+    namespace: orderflow-prod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: orderflow-sre-readonly
